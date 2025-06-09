@@ -3,9 +3,284 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>WebTech Autograder Documentation</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+            line-height: 1.6;
+            color: #333;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        code {
+            background-color: #f6f8fa;
+            border-radius: 3px;
+            padding: 0.2em 0.4em;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 85%;
+        }
+        pre {
+            background-color: #f6f8fa;
+            border-radius: 3px;
+            padding: 16px;
+            overflow: auto;
+        }
+        pre code {
+            padding: 0;
+            font-size: 100%;
+        }
+        .container {
+            display: flex;
+        }
+        nav {
+            width: 200px;
+            padding-right: 20px;
+            position: sticky;
+            top: 20px;
+            height: 100vh;
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+        }
+        nav ul li a {
+            text-decoration: none;
+            color: #0366d6;
+            display: block;
+            padding: 5px 0;
+        }
+        nav ul li a:hover {
+            text-decoration: underline;
+        }
+        main {
+            flex: 1;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1em;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .file-path {
+            font-weight: bold;
+            font-family: monospace;
+            background-color: #e8e8e8;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Page test.</h1>
+    <div class="container">
+        <nav>
+             <h3>Navigation</h3>
+            <ul>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#configuration">Configuration</a></li>
+                <li><a href="#test-suites">Test Suites</a></li>
+                <li><a href="#architecture">System Architecture</a></li>
+                <li><a href="#detailed-breakdown">Detailed Breakdown</a></li>
+            </ul>
+        </nav>
+        <main>
+            <header>
+                <h1>📘 WebTech Autograder Documentation</h1>
+            </header>
+
+            <section id="overview">
+                <h2>1. Overview</h2>
+                <p>The WebTech Autograder is a powerful GitHub Action designed for GitHub Classroom to automate the grading of student projects. It focuses on HTML, CSS, and JavaScript assignments, providing instant, human-readable feedback directly in the student's repository.</p>
+                <p><strong>Key Features:</strong></p>
+                <ul>
+                    <li>🤖 <strong>Automatic Code Grading:</strong> Runs predefined tests against student code.</li>
+                    <li>📝 <strong>Instant Feedback Generation:</strong> Creates a detailed Markdown report based on test results.</li>
+                    <li>🔄 <strong>Automated Repository Commits:</strong> Pushes the feedback report directly to the student's repository.</li>
+                    <li>💯 <strong>GitHub Classroom Integration:</strong> Sends the final score back to the Classroom interface.</li>
+                </ul>
+            </section>
+            <hr>
+            <section id="how-it-works">
+                <h2>2. How It Works: The Workflow</h2>
+                <p>The autograding process is initiated by a push to a student's repository and follows these steps:</p>
+                <ol>
+                    <li><strong>GitHub Action Trigger:</strong> The workflow starts when a student pushes code. This is defined in your <code>.github/workflows/main.yml</code> file.</li>
+                    <li><strong>Docker Environment:</strong> The <code>action.yml</code> file specifies that the autograder runs in a Docker container, ensuring a consistent and clean testing environment.</li>
+                    <li><strong>Entrypoint Script:</strong> The <code class="file-path">entrypoint.sh</code> script is executed. It sets up environment variables and then runs the main Python application, <code class="file-path">autograder.py</code>.</li>
+                    <li><strong>Scoring Orchestration:</strong> <code class="file-path">autograder.py</code> orchestrates the grading process by using the <code>Scorer</code> class from <code class="file-path">grading/final_scorer.py</code>.</li>
+                    <li><strong>Test Execution:</strong> The <code>Scorer</code> class creates instances of the <code>Grader</code> class (<code class="file-path">grading/grader.py</code>) for each test suite (base, bonus, penalty). The <code>Grader</code> uses <code>pytest</code> to run the tests. A custom plugin, <code>TestCollector</code> (<code class="file-path">utils/collector.py</code>), captures the names of passed and failed tests.</li>
+                    <li><strong>Score Calculation:</strong> Based on the test results and the weights defined in <code class="file-path">criteria.json</code>, the <code>Scorer</code> calculates the final score.</li>
+                    <li><strong>Feedback Generation:</strong> The <code>Scorer</code> calls the <code>generate_md</code> function from <code class="file-path">utils/report_generator.py</code>. This function uses the test results and the messages from <code class="file-path">feedback.json</code> to create a detailed Markdown report.</li>
+                    <li><strong>Report Delivery:</strong> <code class="file-path">autograder.py</code> uses the <code>overwrite_report_in_repo</code> function from <code class="file-path">utils/commit_report.py</code> to commit the generated `relatorio.md` file to the student's repository.</li>
+                    <li><strong>Grade Submission:</strong> Finally, the <code>notify_classroom</code> function from <code class="file-path">utils/result_exporter.py</code> is called to send the calculated final score back to GitHub Classroom through the GitHub API.</li>
+                </ol>
+            </section>
+            <hr>
+            <section id="configuration">
+                <h2>3. Configuration</h2>
+                <p>To tailor the autograder to your assignment, you need to configure the grading criteria and the tests.</p>
+                
+                <h3>3.1. Grading Criteria (<code class="file-path">criteria.json</code>)</h3>
+                <p>This file defines the weight of each test category. The `base` and `bonus` weights should sum to 100. `penalty` is a deduction applied to the final score.</p>
+                <pre><code>{
+  "base": {
+    "weight": 75,
+    "subjects": {}
+  },
+  "bonus": {
+    "weight": 25,
+    "subjects": {}
+  },
+  "penalty": {
+    "weight": 10,
+    "subjects": {}
+  }
+}</code></pre>
+                
+                <h3>3.2. Feedback Messages (<code class="file-path">feedback.json</code>)</h3>
+                <p>This file links test functions to feedback messages. It is automatically generated by parsing the docstrings of your test files using the <code class="file-path">utils/feedback_parser.py</code> script. Each test function should have a docstring with `pass:` and `fail:` messages.</p>
+                
+                <h3>3.3. GitHub Action (<code class="file-path">action.yml</code>)</h3>
+                <p>This file defines the GitHub Action itself. It specifies inputs, like the `github.token`, and defines that the action runs using a Docker image.</p>
+                <pre><code>name: "HTML/CSS/JS Autograder"
+author: "Webtech Network"
+description: "An autograding tool for GitHub Classroom..."
+inputs:
+  token:
+    description: "GitHub token used to check repository content and provide feedback."
+    default: ${{ github.token }}
+runs:
+  using: docker
+  image: "Dockerfile"</code></pre>
+            </section>
+            <hr>
+            <section id="test-suites">
+                <h2>4. Test Suites</h2>
+                <p>You must provide your tests in three specific files located in the <code class="file-path">tests/</code> directory. The tests are written using the <code>pytest</code> framework and use <code>BeautifulSoup</code> for parsing HTML.</p>
+
+                <h3>4.1. Base Tests (<code class="file-path">tests/test_base.py</code>)</h3>
+                <p>These tests check for the fundamental requirements of the assignment.</p>
+                <pre><code># tests/test_base.py
+def test_html_html_tag():
+    """
+    pass: The &lt;html&gt; tag is correctly present.
+    fail: The HTML document is missing the &lt;html&gt; tag.
+    """
+    soup = parse_html()
+    assert soup.find('html') is not None, "The &lt;html&gt; tag is missing."</code></pre>
+
+                <h3>4.2. Bonus Tests (<code class="file-path">tests/test_bonus.py</code>)</h3>
+                <p>These tests check for features that go above and beyond the basic requirements.</p>
+                 <pre><code># tests/test_bonus.py
+def test_fontawesome_used():
+    """
+    pass: FontAwesome was correctly linked and is being used for icons.
+    fail: FontAwesome was not found. Consider adding icons to visually enrich the page.
+    """
+    soup = parse_html()
+    fa_linked = any('fontawesome' in link['href'].lower() for link in soup.find_all('link', href=True))
+    fa_used = bool(soup.find('i', class_=lambda x: x and 'fa' in x))
+    assert fa_linked and fa_used, "FontAwesome is not being used."</code></pre>
+
+                <h3>4.3. Penalty Tests (<code class="file-path">tests/test_penalty.py</code>)</h3>
+                <p>These tests check for things that students were explicitly told not to do (e.g., using tables for layout).</p>
+                <pre><code># tests/test_penalty.py
+def test_uses_table_for_layout():
+    """
+    pass: Tables are used correctly for tabular data.
+    fail: A table was used for layout. Avoid using &lt;table&gt; for the visual structure of the page.
+    """
+    soup = parse_html()
+    tables = soup.find_all('table')
+    # Example logic to detect layout tables
+    suspicious = [t for t in tables if len(t.find_all(['th', 'td'])) < 2]
+    assert not suspicious, "A table appears to be used for layout."</code></pre>
+
+            </section>
+            <hr>
+            <section id="architecture">
+                <h2>5. System Architecture</h2>
+                <p>The system is logically divided into several components:</p>
+                <ul>
+                    <li><strong>Execution:</strong> <code class="file-path">action.yml</code>, <code class="file-path">entrypoint.sh</code>, <code class="file-path">autograder.py</code></li>
+                    <li><strong>Grading Core:</strong> The <code class="file-path">grading/</code> directory, containing <code class="file-path">final_scorer.py</code> and <code class="file-path">grader.py</code>.</li>
+                    <li><strong>Utilities:</strong> The <code class="file-path">utils/</code> directory, which has helper modules for configuration, GitHub API interaction, report generation, and test collection.</li>
+                    <li><strong>Configuration & Data:</strong> <code class="file-path">criteria.json</code> and <code class="file-path">feedback.json</code>.</li>
+                </ul>
+            </section>
+            <hr>
+            <section id="detailed-breakdown">
+                <h2>6. Detailed Class & Module Breakdown</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>File / Class</th>
+                            <th>Description</th>
+                            <th>Key Methods / Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code class="file-path">autograder.py</code></td>
+                            <td>The main script that orchestrates the entire autograding process. It parses arguments, initializes the scorer, generates feedback, and notifies GitHub Classroom.</td>
+                            <td>- Parses the GitHub token argument.<br>- Calls <code>Scorer.create_with_scores</code> to run all tests and calculate the score.<br>- Calls <code>overwrite_report_in_repo</code> to push the feedback.<br>- Calls <code>notify_classroom</code> to submit the grade.</td>
+                        </tr>
+                        <tr>
+                            <td><code class="file-path">grading/final_scorer.py</code><br><strong>Class: Scorer</strong></td>
+                            <td>Manages the overall scoring by combining results from base, bonus, and penalty tests.</td>
+                            <td>- <code>create_with_scores(...)</code>: A class method that initializes the scorer, runs all test suites, and calculates the final score.<br>- <code>set_final_score()</code>: Calculates the final score using the formula: `base + bonus - penalty`.<br>- <code>get_feedback()</code>: Generates the complete Markdown feedback report by calling <code>report_generator.generate_md</code>.</td>
+                        </tr>
+                        <tr>
+                            <td><code class="file-path">grading/grader.py</code><br><strong>Class: Grader</strong></td>
+                            <td>Responsible for running a single test suite (e.g., `test_base.py`) using `pytest` and calculating its score based on the configuration.</td>
+                            <td>- <code>create(...)</code>: A class method that initializes the grader and runs the tests to collect passed/failed results.<br>- <code>get_test_results()</code>: Invokes `pytest` programmatically with the <code>TestCollector</code> plugin to capture test outcomes.<br>- <code>generate_score()</code>: Calculates the score for its suite, considering the weights from the configuration.</td>
+                        </tr>
+                         <tr>
+                            <td><code class="file-path">utils/config_loader.py</code><br><strong>Class: Config</strong></td>
+                            <td>Loads and parses the <code class="file-path">criteria.json</code> file into a structured Python object that can be easily used by the grading classes.</td>
+                            <td>- <code>create_config(...)</code>: Loads the main JSON file and then creates separate `TestConfig` objects for base, bonus, and penalty sections.</td>
+                        </tr>
+                        <tr>
+                            <td><code class="file-path">utils/report_generator.py</code><br><strong>Function: generate_md(...)</strong></td>
+                            <td>Generates a human-readable Markdown report from the test results.</td>
+                            <td>- Takes the passed/failed test lists for each category, the final score, and the author's name.<br>- It reads the corresponding friendly messages from <code class="file-path">feedback.json</code> and formats them into a structured report.</td>
+                        </tr>
+                         <tr>
+                            <td><code class="file-path">utils/commit_report.py</code><br><strong>Function: overwrite_report_in_repo(...)</strong></td>
+                            <td>Handles communication with the GitHub API to commit the feedback file into the student's repository.</td>
+                            <td>- Uses the provided GitHub token to authenticate.<br>- Gets the target repository.<br>- Creates a new file (`relatorio.md`) or updates it if it already exists.</td>
+                        </tr>
+                        <tr>
+                            <td><code class="file-path">utils/result_exporter.py</code><br><strong>Function: notify_classroom(...)</strong></td>
+                            <td>Handles communication with the GitHub API to post the final grade back to GitHub Classroom.</td>
+                            <td>- Uses the GitHub token to find the correct "Check Run" associated with the workflow.<br>- Edits the Check Run to include the final score, which makes it visible in the GitHub Classroom UI.</td>
+                        </tr>
+                        <tr>
+                            <td><code class="file-path">utils/collector.py</code><br><strong>Class: TestCollector</strong></td>
+                            <td>A simple `pytest` plugin that collects the results of a test run.</td>
+                            <td>- Implements the `pytest_runtest_logreport` hook.<br>- When a test finishes, it appends the test's node ID to either the `passed` or `failed` list.</td>
+                        </tr>
+                        <tr>
+                            <td><code class="file-path">utils/feedback_parser.py</code><br><strong>Function: generate_feedback_from_docstrings()</strong></td>
+                            <td>A utility script to automatically create the <code class="file-path">feedback.json</code> file.</td>
+                            <td>- Reads all files in the <code class="file-path">tests/</code> directory.<br>- It parses the docstring of each test function (looking for `pass:` and `fail:` prefixes) and maps them to the test's ID.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
 </body>
 </html>
