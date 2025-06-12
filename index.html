@@ -543,27 +543,26 @@ fail: The HTML document is missing the &lt;html&gt; tag.
     <h3>Using Presets</h3>
     <p>After the "@" symbol, you can select a premade preset (e.g., <code>webtech-network/autograder@python</code>). In the <code>criteria.json</code> file, you can then configure which tests from the preset you want to include:</p>
     <pre><code>include: [test_inheritance, test_no_recursion]</code></pre>
-    <div style="background: #f6f8fa; border-radius: 4px; padding: 12px; margin: 1em 0;"></div>
+    <div style="background: #f6f8fa; border-radius: 4px; padding: 12px; margin: 1em 0;">
         <strong>Note:</strong> If you are using a preset, you do <b>not</b> need to create any test files yourself. The preset already provides a set of implemented unit tests. You only need to configure your test selection in <code>criteria.json</code> (specifying which tests will be used).
     </div>
-    <h3>Creating Custom Graders</h3>
     <p>If you choose to build your own tests, you can use <code>@custom</code> and append your own test files to the <code>.github</code> folder. This allows for greater flexibility and customization in your grading setup.</p>
     <h4>Examples</h4>
     <p>Here are examples for each case:</p>
     <ul>
-        <li><strong>Using a preset:</strong>
-            <pre><code>webtech-network/autograder@python</code></pre>
-        </li>
-        <li><strong>Including specific tests:</strong>
-            <pre><code>include: [test_inheritance, test_no_recursion]</code></pre>
-        </li>
-        <li><strong>Creating a custom grader:</strong>
-            <pre><code>@custom
+      <li><strong>Using a preset:</strong>
+        <pre><code>webtech-network/autograder@python</code></pre>
+      </li>
+      <li><strong>Including specific tests:</strong>
+        <pre><code>include: [test_inheritance, test_no_recursion]</code></pre>
+      </li>
+      <li><strong>Creating a custom grader:</strong>
+        <pre><code>@custom
 tests:
-- .github/tests/test_custom.py</code></pre>
-        </li>
+  - .github/tests/test_custom.py</code></pre>
+      </li>
     </ul>
-</section>
+  </section>
   <section id="architecture">
     <h2>5. System Architecture</h2>
     <p>The system is logically divided into several components:</p>
